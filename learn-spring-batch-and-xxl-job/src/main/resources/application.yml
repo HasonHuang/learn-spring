@@ -1,0 +1,42 @@
+server:
+  port: 7020
+
+spring:
+  application:
+    name: batch-executor
+  batch:
+    job:
+      # 启动时不运行任务
+      enabled: false
+  datasource:
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      strict: false #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
+      datasource:
+        master:
+          url: jdbc:mysql://localhost:3306/springbatch?characterEncoding=utf8&useSSL=false
+          username: dev
+          password: 123456
+        xxl-job:
+          url: jdbc:mysql://localhost:3306/xxl_job?characterEncoding=utf8&useSSL=false
+          username: dev
+          password: 123456
+
+xxl:
+  job:
+    # 执行器通讯TOKEN [选填]：非空时启用
+    access-token: 123456
+    admin:
+    # 调度中心部署根地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册；
+      addresses: http://127.0.0.1:8800/xxl-job-admin
+    executor:
+      app-name: batch-executor
+      # 执行器注册 [选填]：优先使用该配置作为注册地址，为空时使用内嵌服务 ”IP:PORT“ 作为注册地址。从而更灵活的支持容器类型执行器动态IP和动态映射端口问题。
+      address: 'http://host.docker.internal:9999/'
+      # 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，该IP不会绑定Host仅作为通讯实用；地址信息用于 "执行器注册" 和 "调度中心请求并触发任务"
+      ip: ''
+      port: 9999
+      #log-path: /var/log/xxl-job/jobhandler
+      log-path: "~/logs/xxl-job/jobhandler"
+      log-retention-days: 30
+

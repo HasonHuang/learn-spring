@@ -7,12 +7,14 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.batch.MyBatisBatchItemWriter;
 import org.mybatis.spring.batch.MyBatisCursorItemReader;
 import org.mybatis.spring.batch.builder.MyBatisCursorItemReaderBuilder;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,7 @@ public class BatchJobConfig {
     public Job helloJon(JobBuilderFactory jobBuilderFactory, Step step) {
         return jobBuilderFactory.get("helloJob")
                 .start(step)
+
                 .build();
     }
 
@@ -48,19 +51,33 @@ public class BatchJobConfig {
                 .build();
     }
 
-//    @Bean
-    public ItemWriter<BillDO> billWriter() {
+    @Bean
+    @StepScope
+    public BillItemWriter billWriter() {
         return new BillItemWriter();
     }
 
-    @Component
+//    @Component
     @Slf4j
-    static class BillItemWriter implements ItemWriter<BillDO> {
+    static class BillItemWriter implements ItemWriter<BillDO>, StepExecutionListener {
+        private StepExecution stepExecution;
         @Override
         public void write(List<? extends BillDO> items) throws Exception {
+            log.info("StepExecution: " + stepExecution);
             for (BillDO item : items) {
                 log.info("Writing: {}", item);
             }
         }
+
+    @Override
+    public void beforeStep(StepExecution stepExecution) {
+        this.stepExecution = stepExecution;
     }
+
+    @Override
+    public ExitStatus afterStep(StepExecution stepExecution) {
+        log.info("Exit Status: " + stepExecution.getExitStatus());
+        return stepExecution.getExitStatus();
+    }
+}
 }

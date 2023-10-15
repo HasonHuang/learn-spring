@@ -22,6 +22,7 @@
 
     <modules>
         <module>learn-spring-batch-and-xxl-job</module>
+        <module>spring-boot-cache</module>
     </modules>
 
     <dependencyManagement>
